@@ -1,0 +1,78 @@
+{
+    "name": "gameserver",
+    "level": "DEBUG",
+    "async": true,
+    "async_queue_size": 10000,
+    "propagate": true,
+    "pattern": "[%Y-%m-%d %H:%M:%S.%e] [%l] [%n] [%t/%p] %m",
+
+    "file": {
+        "path": "logs/gameserver.log",
+        "max_size": 10485760,
+        "max_files": 10,
+        "compress": true,
+        "daily_rotation": false
+    },
+
+    "network": {
+        "enabled": false,
+        "host": "localhost",
+        "port": 514
+    },
+
+    "console": {
+        "enabled": true,
+        "colors": true,
+        "timestamps": true
+    },
+
+    "loggers": {
+        "binary_protocol": {
+            "level": "INFO",
+            "file": {
+                "path": "logs/protocol.log",
+                "max_size": 5242880
+            }
+        },
+
+        "network": {
+            "level": "DEBUG",
+            "file": {
+                "path": "logs/network.log"
+            }
+        },
+
+        "python": {
+            "level": "INFO",
+            "file": {
+                "path": "logs/python.log"
+            }
+        },
+
+        "game_server": {
+            "level": "INFO",
+            "file": {
+                "path": "logs/server.log"
+            }
+        },
+
+        "game_client": {
+            "level": "INFO",
+            "file": {
+                "path": "logs/client.log"
+            }
+        },
+
+        "debug": {
+            "level": "TRACE",
+            "file": {
+                "path": "logs/debug.log",
+                "max_size": 10485760
+            },
+            "console": {
+                "enabled": true,
+                "colors": true
+            }
+        }
+    }
+}
