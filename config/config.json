@@ -1,0 +1,42 @@
+{
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080,
+        "max_connections": 10000,
+        "io_threads": 4,
+        "reuse_port": true,
+        "process_count": 4
+    },
+    "database": {
+        "host": "localhost",
+        "port": 5432,
+        "database_name": "game_db",
+        "username": "game_user",
+        "password": "secure_password",
+        "pool_size": 10,
+        "citus_coordinator": "coordinator.local",
+        "citus_worker_nodes": [
+            "worker1.local:5432",
+            "worker2.local:5432",
+            "worker3.local:5432"
+        ],
+        "shard_count": 32
+    },
+    "game": {
+        "max_players_per_session": 100,
+        "heartbeat_interval_seconds": 30,
+        "session_timeout_seconds": 300,
+        "world_size": {
+            "x": 1000,
+            "y": 1000,
+            "z": 100
+        }
+    },
+    "logging": {
+        "level": "info",
+        "file_path": "/var/log/gameserver/server.log",
+        "max_file_size_mb": 100,
+        "max_files": 10,
+        "console_output": true
+    }
+}

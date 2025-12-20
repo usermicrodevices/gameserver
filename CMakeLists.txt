@@ -1,41 +1,54 @@
 cmake_minimum_required(VERSION 3.15)
-project(GameNetwork)
+project(GameServer VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find Python
-find_package(Python3 COMPONENTS Development REQUIRED)
-
-# ASIO (standalone)
+# ASIO standalone
 add_library(asio INTERFACE)
 target_include_directories(asio INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/asio/asio/include)
-
-# Main library
-add_library(game_network STATIC
-    src/binary_protocol.cpp
-    src/python_embedder.cpp
-    src/game_server.cpp
-    src/game_client.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asio/asio/include
 )
 
-target_include_directories(game_network PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${Python3_INCLUDE_DIRS}
+# nlohmann-json
+find_package(nlohmann_json 3.9.1 REQUIRED)
+
+# PostgreSQL
+find_package(PostgreSQL REQUIRED)
+
+# spdlog for logging
+find_package(spdlog 1.9.0 REQUIRED)
+
+# Include directories
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Sources
+set(SOURCES
+    src/main.cpp
+    src/config/ConfigManager.cpp
+    src/database/DatabasePool.cpp
+    src/database/CitusClient.cpp
+    src/network/GameSession.cpp
+    src/network/GameServer.cpp
+    src/network/ConnectionManager.cpp
+    src/process/ProcessPool.cpp
+    src/logging/Logger.cpp
+    src/game/GameLogic.cpp
+    src/game/PlayerManager.cpp
 )
 
-target_link_libraries(game_network PUBLIC
+# Executable
+add_executable(game_server ${SOURCES})
+
+# Link libraries
+target_link_libraries(game_server
     asio
-    ${Python3_LIBRARIES}
+    nlohmann_json::nlohmann_json
+    PostgreSQL::PostgreSQL
+    spdlog::spdlog
+    pthread
 )
 
-# Examples
-add_executable(example_server examples/example_server.cpp)
-target_link_libraries(example_server game_network)
-
-add_executable(example_client examples/example_client.cpp)
-target_link_libraries(example_client game_network)
-
-# Copy Python scripts to build directory
-file(COPY scripts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Install
+install(TARGETS game_server DESTINATION bin)
+install(DIRECTORY config/ DESTINATION config)
