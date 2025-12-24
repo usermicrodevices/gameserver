@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(GameServer VERSION 1.0.0)
+project(GameServer VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,8 +19,12 @@ find_package(PostgreSQL REQUIRED)
 # spdlog for logging
 find_package(spdlog 1.9.0 REQUIRED)
 
+# Add Python support
+find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
+
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${Python3_INCLUDE_DIRS})
 
 # Sources
 set(SOURCES
@@ -47,8 +51,10 @@ target_link_libraries(game_server
     PostgreSQL::PostgreSQL
     spdlog::spdlog
     pthread
+    ${Python3_LIBRARIES}
 )
 
 # Install
 install(TARGETS game_server DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
+install(DIRECTORY scripts/ DESTINATION scripts)

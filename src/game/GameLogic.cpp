@@ -1,11 +1,13 @@
-#include "game/GameLogic.hpp"
-#include "config/ConfigManager.hpp"
-#include "logging/Logger.hpp"
-#include "database/CitusClient.hpp"
 #include <cmath>
 #include <random>
 #include <algorithm>
 #include <chrono>
+
+#include "game/GameLogic.hpp"
+#include "config/ConfigManager.hpp"
+#include "logging/Logger.hpp"
+#include "database/CitusClient.hpp"
+#include "scripting/PythonScripting.hpp"
 
 // =============== GameLogic Implementation ===============
 
@@ -20,9 +22,12 @@ GameLogic& GameLogic::GetInstance() {
     return *instance_;
 }
 
+// GameLogic constructor
 GameLogic::GameLogic()
 : playerManager_(PlayerManager::GetInstance()),
 dbClient_(CitusClient::GetInstance()),
+pythonScripting_(PythonScripting::PythonScripting::GetInstance()),
+pythonEnabled_(false),
 gameLoopInterval_(std::chrono::milliseconds(16)), // ~60 FPS
 running_(false) {
 
@@ -30,6 +35,47 @@ running_(false) {
     rng_.seed(std::random_device()());
 
     Logger::Debug("GameLogic initialized");
+}
+
+// helper method to fire events from anywhere
+void GameLogic::FirePythonEvent(const std::string& eventName, const nlohmann::json& data) {
+    if (pythonEnabled_) {
+        pythonScripting_.FireEvent(eventName, data);
+    }
+}
+
+// method to call Python functions directly
+nlohmann::json GameLogic::CallPythonFunction(const std::string& moduleName,
+                                             const std::string& functionName,
+                                             const nlohmann::json& args) {
+    if (!pythonEnabled_) {
+        return nlohmann::json();
+    }
+
+    return pythonScripting_.CallFunctionWithResult(moduleName, functionName, args);
+}
+
+
+// method to register Python event handlers
+void GameLogic::RegisterPythonEventHandlers() {
+    if (!pythonEnabled_) {
+        return;
+    }
+
+    // Register event handlers from Python modules
+    pythonScripting_.RegisterEventHandler("player_login", "game_events", "on_player_login");
+    pythonScripting_.RegisterEventHandler("player_move", "game_events", "on_player_move");
+    pythonScripting_.RegisterEventHandler("player_attack", "game_events", "on_player_attack");
+    pythonScripting_.RegisterEventHandler("player_level_up", "game_events", "on_player_level_up");
+    pythonScripting_.RegisterEventHandler("player_death", "game_events", "on_player_death");
+    pythonScripting_.RegisterEventHandler("player_respawn", "game_events", "on_player_respawn");
+    pythonScripting_.RegisterEventHandler("custom_event", "game_events", "on_custom_event");
+
+    // Register quest system handlers
+    pythonScripting_.RegisterEventHandler("player_kill", "quests", "on_player_kill");
+    pythonScripting_.RegisterEventHandler("item_collected", "quests", "on_item_collected");
+
+    Logger::Info("Python event handlers registered");
 }
 
 void GameLogic::Initialize() {
@@ -53,6 +99,31 @@ void GameLogic::Initialize() {
     // Register default message handlers
     RegisterDefaultHandlers();
 
+    // Initialize Python scripting if enabled
+    auto& config = ConfigManager::GetInstance();
+    pythonEnabled_ = config.GetBool("python.enabled", false);
+
+    if (pythonEnabled_) {
+        if (pythonScripting_.Initialize()) {
+            Logger::Info("Python scripting initialized");
+
+            // Register Python event handlers
+            RegisterPythonEventHandlers();
+
+            // Start script hot reloader if enabled
+            bool hotReloadEnabled = config.GetBool("python.hot_reload", true);
+            if (hotReloadEnabled) {
+                std::string scriptDir = config.GetString("python.script_dir", "./scripts");
+                scriptHotReloader_ = std::make_unique<PythonScripting::ScriptHotReloader>(
+                    scriptDir, 2000); // Check every 2 seconds
+                scriptHotReloader_->Start();
+            }
+        } else {
+            Logger::Warn("Failed to initialize Python scripting, continuing without it");
+            pythonEnabled_ = false;
+        }
+    }
+
     // Start game loop thread
     running_ = true;
     gameLoopThread_ = std::thread(&GameLogic::GameLoop, this);
@@ -72,6 +143,15 @@ void GameLogic::Shutdown() {
     }
 
     Logger::Info("Shutting down GameLogic...");
+
+    if (scriptHotReloader_) {
+        scriptHotReloader_->Stop();
+        scriptHotReloader_.reset();
+    }
+
+    if (pythonEnabled_) {
+        pythonScripting_.Shutdown();
+    }
 
     // Stop all threads
     running_ = false;
@@ -376,11 +456,15 @@ void GameLogic::HandleLogin(uint64_t sessionId, const nlohmann::json& data) {
         // Log successful login
         dbClient_.LogGameEvent(player->GetId(), 0, "login_success", {
             {"session_id", std::to_string(sessionId)},
-                               {"ip", session->GetRemoteEndpoint().address().to_string()}
+                {"ip", session->GetRemoteEndpoint().address().to_string()}
         });
 
-        Logger::Info("Player {} logged in successfully (session {})",
-                     username, sessionId);
+        // Fire Python event
+        if (pythonEnabled_) {
+            pythonScripting_.FireEvent("player_login", {{"player_id", player->GetId()}, {"username", username}, {"session_id", sessionId}, {"ip_address", session->GetRemoteEndpoint().address().to_string()}});
+        }
+
+        Logger::Info("Player {} logged in successfully (session {})", username, sessionId);
 
     } catch (const std::exception& e) {
         Logger::Error("Login error for session {}: {}", sessionId, e.what());
@@ -549,6 +633,17 @@ void GameLogic::HandleMovement(uint64_t sessionId, const nlohmann::json& data) {
             {"timestamp", GetCurrentTimestamp()}
         };
         session->Send(response);
+
+        // Fire Python event
+        if (pythonEnabled_) {
+            pythonScripting_.FireEvent("player_move", {
+                {"player_id", playerId},
+                {"x", x},
+                {"y", y},
+                {"z", z},
+                {"session_id", sessionId}
+            });
+        }
 
         // Broadcast movement to nearby players
         BroadcastPlayerMovement(playerId, x, y, z);

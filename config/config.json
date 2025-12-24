@@ -39,4 +39,16 @@
         "max_files": 10,
         "console_output": true
     }
+    "python": {
+        "enabled": true,
+        "script_dir": "./scripts",
+        "home": "/usr/local/python3",
+        "paths": [
+            "./scripts/lib",
+            "./scripts/modules"
+        ],
+        "hot_reload": true,
+        "auto_load_modules": true,
+        "debug": false
+    }
 }
