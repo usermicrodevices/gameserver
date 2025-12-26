@@ -243,29 +243,30 @@ void GameSession::DoWrite() {
     std::string data = writeQueue_.front();
 
     asio::async_write(socket_, asio::buffer(data),
-                      [self = shared_from_this()](std::error_code ec, std::size_t length) {
-                          std::lock_guard<std::mutex> lock(self->writeMutex_);
+        [self = shared_from_this()](std::error_code ec, std::size_t length) {
+            std::lock_guard<std::mutex> lock(self->writeMutex_);
 
-                          if (ec) {
-                              Logger::Error("Session {} write error: {}",
-                                            self->sessionId_, ec.message());
-                              self->Stop();
-                              return;
-                          }
+            if (ec) {
+                Logger::Error("Session {} write error: {}",
+                            self->sessionId_, ec.message());
+                self->Stop();
+                return;
+            }
 
-                          Logger::Debug("Session {} sent {} bytes",
-                                        self->sessionId_, length);
+            Logger::Debug("Session {} sent {} bytes",
+                        self->sessionId_, length);
 
-                          // Remove the sent message from queue
-                          if (!self->writeQueue_.empty()) {
-                              self->writeQueue_.pop();
-                          }
+            // Remove the sent message from queue
+            if (!self->writeQueue_.empty()) {
+                self->writeQueue_.pop();
+            }
 
-                          // Continue writing if there are more messages
-                          if (!self->writeQueue_.empty()) {
-                              self->DoWrite();
-                          }
-                      });
+            // Continue writing if there are more messages
+            if (!self->writeQueue_.empty()) {
+                self->DoWrite();
+            }
+        }
+    );
 }
 
 void GameSession::StartHeartbeat() {
