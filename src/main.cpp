@@ -35,47 +35,46 @@ void WorkerMain(int workerId) {
         " port=" + std::to_string(config.GetDatabasePort()) +
         " dbname=" + config.GetDatabaseName() +
         " user=" + config.GetDatabaseUser() +
-        " password=" + config.GetDatabasePassword(),
-                             workerNodes)) {
+        " password=" + config.GetDatabasePassword(), workerNodes)) {
         Logger::Error("Worker {} failed to initialize database", workerId);
-                             }
+    }
 
-                             // Initialize game logic
-                             auto& gameLogic = GameLogic::GetInstance();
-                             gameLogic.Initialize();
+    // Initialize game logic
+    auto& gameLogic = GameLogic::GetInstance();
+    gameLogic.Initialize();
 
-                             // Create game server
-                             GameServer server(config);
+    // Create game server
+    GameServer server(config);
 
-                             // Set session factory
-                             server.SetSessionFactory([](asio::ip::tcp::socket socket) {
-                                 auto session = std::make_shared<GameSession>(std::move(socket));
+    // Set session factory
+    server.SetSessionFactory([](asio::ip::tcp::socket socket) {
+        auto session = std::make_shared<GameSession>(std::move(socket));
 
-                                 // Set message handler
-                                 session->SetMessageHandler([session](const nlohmann::json& msg) {
-                                     GameLogic::GetInstance().HandleMessage(session->GetSessionId(), msg);
-                                 });
+        // Set message handler
+        session->SetMessageHandler([session](const nlohmann::json& msg) {
+            GameLogic::GetInstance().HandleMessage(session->GetSessionId(), msg);
+        });
 
-                                 // Set close handler
-                                 session->SetCloseHandler([session]() {
-                                     ConnectionManager::GetInstance().Stop(session);
-                                     PlayerManager::GetInstance().PlayerDisconnected(session->GetSessionId());
-                                 });
+        // Set close handler
+        session->SetCloseHandler([session]() {
+            ConnectionManager::GetInstance().Stop(session);
+            PlayerManager::GetInstance().PlayerDisconnected(session->GetSessionId());
+        });
 
-                                 return session;
-                             });
+        return session;
+    });
 
-                             // Initialize and run server
-                             if (server.Initialize()) {
-                                 Logger::Info("Worker {} server initialized, starting...", workerId);
-                                 server.Run();
-                             } else {
-                                 Logger::Critical("Worker {} failed to initialize server", workerId);
-                             }
+    // Initialize and run server
+    if (server.Initialize()) {
+        Logger::Info("Worker {} server initialized, starting...", workerId);
+        server.Run();
+    } else {
+        Logger::Critical("Worker {} failed to initialize server", workerId);
+    }
 
-                             // Cleanup
-                             gameLogic.Shutdown();
-                             Logger::Info("Worker {} shutdown complete", workerId);
+    // Cleanup
+    gameLogic.Shutdown();
+    Logger::Info("Worker {} shutdown complete", workerId);
 }
 
 int main(int argc, char* argv[]) {

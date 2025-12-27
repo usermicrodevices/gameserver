@@ -154,6 +154,24 @@ public:
     void BeginGracefulShutdown();
     void CancelGracefulShutdown();
 
+    // World and entity methods
+    void SendWorldChunk(int chunkX, int chunkZ, const nlohmann::json& chunkData);
+    void SendEntityUpdate(uint64_t entityId, const nlohmann::json& entityData);
+    void SendEntitySpawn(uint64_t entityId, const nlohmann::json& spawnData);
+    void SendEntityDespawn(uint64_t entityId);
+    void SendCollisionEvent(uint64_t entityId1, uint64_t entityId2, const glm::vec3& point);
+
+    // Player state synchronization
+    void SyncPlayerState(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& velocity);
+    void SendNearbyEntities(const std::vector<nlohmann::json>& entities);
+
+    // NPC interaction
+    void SendNPCInteraction(uint64_t npcId, const std::string& interactionType, const nlohmann::json& data = {});
+
+    // Compression for large world data
+    void SendCompressedWorldData(const std::vector<uint8_t>& compressedData);
+
+
 private:
     // Core networking
     asio::ip::tcp::socket socket_;
@@ -231,4 +249,10 @@ private:
 
     // Queue management
     size_t maxWriteQueueSize_{1000};
+
+    void HandleWorldRequest(const nlohmann::json& data);
+    void HandleEntityInteraction(const nlohmann::json& data);
+    void HandleMovementUpdate(const nlohmann::json& data);
+    void HandleFamiliarCommand(const nlohmann::json& data);
+
 };
