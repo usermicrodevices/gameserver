@@ -1,60 +1,58 @@
 cmake_minimum_required(VERSION 3.15)
-project(GameServer VERSION 0.0.1)
+project(GameServer3D)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ASIO standalone
-add_library(asio INTERFACE)
-target_include_directories(asio INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asio/asio/include
+# Find dependencies
+find_package(OpenGL REQUIRED)
+find_package(glm REQUIRED)
+find_package(asio REQUIRED)
+find_package(nlohmann_json REQUIRED)
+
+# Add GLM include directory
+include_directories(${glm_INCLUDE_DIRS})
+
+# Source files for 3D world system
+set(WORLD_SOURCES
+    src/game/GameLogic.cpp
+    src/game/WorldChunk.cpp
+    src/game/WorldGenerator.cpp
+    src/game/NPCSystem.cpp
+    src/game/CollisionSystem.cpp
+    src/game/EntityManager.cpp
 )
-
-# nlohmann-json
-find_package(nlohmann_json 3.9.1 REQUIRED)
-
-# PostgreSQL
-find_package(PostgreSQL REQUIRED)
-
-# spdlog for logging
-find_package(spdlog 1.9.0 REQUIRED)
-
-# Add Python support
-find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
 
 # Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${Python3_INCLUDE_DIRS})
-
-# Sources
-set(SOURCES
-    src/main.cpp
-    src/config/ConfigManager.cpp
-    src/database/DatabasePool.cpp
-    src/database/CitusClient.cpp
-    src/network/GameSession.cpp
-    src/network/GameServer.cpp
-    src/network/ConnectionManager.cpp
-    src/process/ProcessPool.cpp
-    src/logging/Logger.cpp
-    src/game/GameLogic.cpp
-    src/game/PlayerManager.cpp
+include_directories(
+    include
+    ${OPENGL_INCLUDE_DIR}
+    ${glm_INCLUDE_DIRS}
 )
 
-# Executable
-add_executable(game_server ${SOURCES})
+# Main executable
+add_executable(gameserver3d
+    src/main.cpp
+    ${WORLD_SOURCES}
+    # ... existing source files ...
+)
 
 # Link libraries
-target_link_libraries(game_server
-    asio
+target_link_libraries(gameserver3d
+    ${OPENGL_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    asio::asio
     nlohmann_json::nlohmann_json
-    PostgreSQL::PostgreSQL
-    spdlog::spdlog
-    pthread
-    ${Python3_LIBRARIES}
 )
 
-# Install
-install(TARGETS game_server DESTINATION bin)
+# Compiler flags
+if(MSVC)
+    target_compile_options(gameserver3d PRIVATE /W4)
+else()
+    target_compile_options(gameserver3d PRIVATE -Wall -Wextra -pedantic)
+endif()
+
+# Installation
+install(TARGETS gameserver3d DESTINATION bin)
 install(DIRECTORY config/ DESTINATION config)
 install(DIRECTORY scripts/ DESTINATION scripts)
