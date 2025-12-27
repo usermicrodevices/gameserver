@@ -25,6 +25,54 @@
     "despawnDistance": 150.0
   },
 
+  "mobs": {
+    "enabled": true,
+    "spawnZones": [
+      {
+        "name": "goblin_forest",
+        "center": [100.0, 10.0, 100.0],
+        "radius": 50.0,
+        "mobType": 0,
+        "minLevel": 1,
+        "maxLevel": 5,
+        "maxMobs": 15,
+        "respawnTime": 30.0
+      },
+      {
+        "name": "orc_camp",
+        "center": [500.0, 15.0, 500.0],
+        "radius": 75.0,
+        "mobType": 1,
+        "minLevel": 5,
+        "maxLevel": 15,
+        "maxMobs": 10,
+        "respawnTime": 45.0
+      },
+      {
+        "name": "dragon_lair",
+        "center": [1000.0, 30.0, 1000.0],
+        "radius": 100.0,
+        "mobType": 2,
+        "minLevel": 20,
+        "maxLevel": 30,
+        "maxMobs": 3,
+        "respawnTime": 300.0
+      },
+      {
+        "name": "slime_swamp",
+        "center": [-200.0, 5.0, -200.0],
+        "radius": 60.0,
+        "mobType": 3,
+        "minLevel": 1,
+        "maxLevel": 10,
+        "maxMobs": 20,
+        "respawnTime": 20.0
+      }
+    ],
+    "experienceMultiplier": 1.0,
+    "lootDropChance": 1.0
+  },
+
   "collision": {
     "enabled": true,
     "gridCellSize": 10.0,

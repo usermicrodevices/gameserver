@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <algorithm>
 
 ConfigManager& ConfigManager::GetInstance() {
     static ConfigManager instance;
@@ -542,4 +543,71 @@ void ConfigManager::StopWatching() {
     // This is a simplified implementation
     // In a real implementation, you'd need a way to signal the watcher thread
     Logger::Info("Configuration watching stopped");
+}
+
+// Generic config accessors
+int ConfigManager::GetInt(const std::string& key, int defaultValue) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.at(ptr).get<int>();
+    } catch (const std::exception& e) {
+        return defaultValue;
+    }
+}
+
+float ConfigManager::GetFloat(const std::string& key, float defaultValue) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.at(ptr).get<float>();
+    } catch (const std::exception& e) {
+        return defaultValue;
+    }
+}
+
+bool ConfigManager::GetBool(const std::string& key, bool defaultValue) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.at(ptr).get<bool>();
+    } catch (const std::exception& e) {
+        return defaultValue;
+    }
+}
+
+std::string ConfigManager::GetString(const std::string& key, const std::string& defaultValue) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.at(ptr).get<std::string>();
+    } catch (const std::exception& e) {
+        return defaultValue;
+    }
+}
+
+nlohmann::json ConfigManager::GetJson(const std::string& key) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.at(ptr);
+    } catch (const std::exception& e) {
+        return nlohmann::json();
+    }
+}
+
+bool ConfigManager::HasKey(const std::string& key) const {
+    try {
+        std::string keyPath = key;
+        std::replace(keyPath.begin(), keyPath.end(), '.', '/');
+        nlohmann::json::json_pointer ptr("/" + keyPath);
+        return config_.contains(ptr);
+    } catch (const std::exception& e) {
+        return false;
+    }
 }

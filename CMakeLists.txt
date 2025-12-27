@@ -19,6 +19,8 @@ set(WORLD_SOURCES
     src/game/WorldChunk.cpp
     src/game/WorldGenerator.cpp
     src/game/NPCSystem.cpp
+    src/game/MobSystem.cpp
+    src/game/GameEntity.cpp
     src/game/CollisionSystem.cpp
     src/game/EntityManager.cpp
 )

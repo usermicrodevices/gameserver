@@ -15,6 +15,7 @@
 #include "PythonScripting.hpp"
 #include "WorldChunk.hpp"
 #include "NPCSystem.hpp"
+#include "MobSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "EntityManager.hpp"
 
@@ -112,6 +113,9 @@ private:
     std::mutex npcMutex_;
     std::atomic<int> activeNPCCount_{0};
 
+    // Mob system
+    MobSystem& mobSystem_;
+
     // Collision system
     std::unique_ptr<CollisionSystem> collisionSystem_;
 
@@ -129,6 +133,10 @@ private:
     void ProcessPlayerUpdates(float deltaTime);
     void SendChunkDataToPlayer(uint64_t sessionId, WorldChunk* chunk);
     void SyncEntityStateToPlayer(uint64_t sessionId, uint64_t entityId);
+    void InitializeWorldSystem();
+    void InitializeNPCSystem();
+    void InitializeMobSystem();
+    void InitializeCollisionSystem();
 
     PythonScripting::PythonScripting& pythonScripting_;
     std::unique_ptr<PythonScripting::ScriptHotReloader> scriptHotReloader_;

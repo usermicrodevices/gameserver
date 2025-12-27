@@ -53,6 +53,10 @@ public:
     NPCType GetType() const { return type_; }
     NPCBehaviorState GetBehaviorState() const { return behaviorState_; }
     const NPCStats& GetStats() const { return stats_; }
+    NPCStats& GetStats() { return stats_; }
+    void SetStats(const NPCStats& stats) { stats_ = stats; }
+
+    void InitializeStatsForType(NPCType type);
 
     void Update(float deltaTime);
     void SetTarget(uint64_t targetId);
@@ -69,6 +73,20 @@ public:
     // AI decision making
     void MakeDecision();
     float CalculateThreatLevel() const;
+
+    // Getters/Setters
+    uint64_t GetOwnerId() const { return ownerId_; }
+    void SetOwnerId(uint64_t ownerId) { ownerId_ = ownerId; }
+    uint64_t GetTargetId() const { return targetId_; }
+    void SetBehaviorState(NPCBehaviorState state) { behaviorState_ = state; }
+    void SetPatrolCenter(const glm::vec3& center) { patrolCenter_ = center; }
+    void SetPatrolRadius(float radius) { patrolRadius_ = radius; }
+    NPCStats& GetStats() { return stats_; }
+    void SetStats(const NPCStats& stats) { stats_ = stats; }
+
+    // Health check
+    bool IsAlive() const { return stats_.health > 0.0f; }
+    bool IsDead() const { return stats_.health <= 0.0f; }
 
     // Serialization
     nlohmann::json Serialize() const override;

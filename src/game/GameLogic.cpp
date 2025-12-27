@@ -13,6 +13,7 @@
 #include "game/WorldChunk.hpp"
 #include "game/WorldGenerator.hpp"
 #include "game/NPCSystem.hpp"
+#include "game/MobSystem.hpp"
 #include "game/CollisionSystem.hpp"
 #include "game/EntityManager.hpp"
 
@@ -43,6 +44,7 @@ GameLogic::GameLogic()
 entityManager_(EntityManager::GetInstance()),
 dbClient_(CitusClient::GetInstance()),
 pythonScripting_(PythonScripting::PythonScripting::GetInstance()),
+mobSystem_(MobSystem::GetInstance()),
 pythonEnabled_(false),
 gameLoopInterval_(std::chrono::milliseconds(16)), // ~60 FPS
 running_(false),
@@ -87,6 +89,7 @@ void GameLogic::Initialize() {
     // Initialize 3D world systems
     InitializeWorldSystem();
     InitializeNPCSystem();
+    InitializeMobSystem();
     InitializeCollisionSystem();
 
     // Load game data from database
@@ -175,6 +178,20 @@ void GameLogic::InitializeNPCSystem() {
     }
 
     Logger::Info("Spawned {} initial NPCs", initialNPCCount);
+}
+
+void GameLogic::InitializeMobSystem() {
+    Logger::Info("Initializing mob system...");
+    mobSystem_.Initialize();
+
+    // Load mob configuration
+    auto& config = ConfigManager::GetInstance();
+    if (config.HasKey("mobs")) {
+        nlohmann::json mobConfig = config.GetJson("mobs");
+        mobSystem_.LoadMobConfig(mobConfig);
+    }
+
+    Logger::Info("Mob system initialized");
 }
 
 void GameLogic::InitializeCollisionSystem() {
@@ -453,6 +470,10 @@ void GameLogic::UpdateNPCs(float deltaTime) {
 
         BroadcastToNearbyPlayers(npc->GetPosition(), update, 150.0f);
     }
+
+    // Update mob system (spawn zones, respawns)
+    mobSystem_.UpdateSpawnZones(deltaTime);
+    mobSystem_.ProcessRespawns(deltaTime);
 }
 
 NPCEntity* GameLogic::GetNPCEntity(uint64_t npcId) {
@@ -717,6 +738,18 @@ void GameLogic::HandleNPCInteraction(uint64_t sessionId, const nlohmann::json& d
             float damage = 10.0f; // Base damage, get from player stats
             npc->TakeDamage(damage, playerId);
 
+            // Check if mob is dead
+            bool wasAlive = npc->IsAlive();
+            bool isDead = npc->IsDead();
+
+            // If mob died, handle death
+            if (wasAlive && isDead) {
+                // Check if it's a hostile mob
+                if (mobSystem_.IsHostileMob(npc->GetType())) {
+                    mobSystem_.OnMobDeath(npcId, playerId);
+                }
+            }
+
             // Send combat event
             nlohmann::json combatEvent = {
                 {"type", "combat_event"},
@@ -724,6 +757,7 @@ void GameLogic::HandleNPCInteraction(uint64_t sessionId, const nlohmann::json& d
                 {"targetId", npcId},
                 {"damage", damage},
                 {"remainingHealth", npc->GetStats().health},
+                {"isDead", isDead},
                 {"timestamp", GetCurrentTimestamp()}
             };
             SendToSession(sessionId, combatEvent);
