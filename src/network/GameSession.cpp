@@ -676,6 +676,8 @@ SessionMetrics GameSession::GetMetrics() const {
         now - connectedTime_);
 
     SessionMetrics metrics;
+    metrics.receive_rate = 0.0;
+    metrics.send_rate = 0.0;
     metrics.session_id = sessionId_;
     metrics.connected_time_seconds = connectedTime.count();
     metrics.is_connected = IsConnected();
