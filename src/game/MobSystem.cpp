@@ -203,6 +203,24 @@ std::vector<LootItem> MobSystem::GenerateLoot(NPCType type, int level) const {
 }
 
 void MobSystem::DropLoot(const MobDeathInfo& deathInfo) {
+    // Generate loot using loot table manager
+    // auto& lootManager = LootTableManager::GetInstance();
+    // std::string lootTable = GetLootTableForMob(mob->GetType(), deathInfo.level);
+    // auto lootItems = lootManager.GenerateLoot(
+    //     lootTable,
+    //     deathInfo.level,
+    //     1.0f  // TODO: Get player luck multiplier
+    // );
+    // Drop loot in world
+//     for (const auto& [item, quantity] : lootItems) {
+//         // Create loot entity at death position with slight offset
+//         glm::vec3 lootPos = deathInfo.deathPosition;
+//         lootPos.x += (rand() % 100) / 100.0f - 0.5f;
+//         lootPos.z += (rand() % 100) / 100.0f - 0.5f;
+//
+//         // TODO: Create loot entity in world
+//         // entityManager_.CreateLootEntity(lootPos, item, quantity);
+//     }
     std::vector<LootItem> loot = GenerateLoot(deathInfo.mobType, deathInfo.level);
 
     if (loot.empty()) {
@@ -294,6 +312,20 @@ void MobSystem::OnMobDeath(uint64_t mobId, uint64_t killerId) {
 
     // Despawn the mob
     DespawnMob(mobId);
+
+    // Fire Python events
+    FirePythonEvent("mob_death", {
+        {"mobId", mobId},
+        {"killerId", killerId},
+        {"mobType", static_cast<int>(mob->GetType())},
+                    {"level", deathInfo.level},
+                    {"experience", experience},
+                    {"deathPosition", {
+                        deathInfo.deathPosition.x,
+                        deathInfo.deathPosition.y,
+                        deathInfo.deathPosition.z
+                    }}
+    });
 
     Logger::Info("Mob {} killed by player {}", mobId, killerId);
 }

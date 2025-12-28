@@ -76,6 +76,14 @@ public:
     PlayerEntity* GetPlayerEntity(uint64_t playerId);
     NPCEntity* GetNPCEntity(uint64_t npcId);
 
+    // Loot management
+    void HandleLootPickup(uint64_t sessionId, const nlohmann::json& data);
+    void HandleInventoryMove(uint64_t sessionId, const nlohmann::json& data);
+    void HandleItemUse(uint64_t sessionId, const nlohmann::json& data);
+    void HandleItemDrop(uint64_t sessionId, const nlohmann::json& data);
+    void HandleTradeRequest(uint64_t sessionId, const nlohmann::json& data);
+    void HandleGoldTransaction(uint64_t sessionId, const nlohmann::json& data);
+
     // Register custom message handlers
     void RegisterHandler(const std::string& messageType, MessageHandler handler);
 
@@ -115,6 +123,10 @@ private:
 
     // Mob system
     MobSystem& mobSystem_;
+
+    // Inventory system and loot manager
+    std::unique_ptr<InventorySystem> inventorySystem_;
+    std::unique_ptr<LootTableManager> lootTableManager_;
 
     // Collision system
     std::unique_ptr<CollisionSystem> collisionSystem_;

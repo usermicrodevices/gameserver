@@ -13,6 +13,13 @@ find_package(nlohmann_json REQUIRED)
 # Add GLM include directory
 include_directories(${glm_INCLUDE_DIRS})
 
+# Add loot system source files
+set(LOOT_SOURCES
+    src/game/LootItem.cpp
+    src/game/InventorySystem.cpp
+    src/game/LootTable.cpp
+)
+
 # Source files for 3D world system
 set(WORLD_SOURCES
     src/game/GameLogic.cpp
@@ -23,6 +30,7 @@ set(WORLD_SOURCES
     src/game/GameEntity.cpp
     src/game/CollisionSystem.cpp
     src/game/EntityManager.cpp
+    ${LOOT_SOURCES}
 )
 
 # Include directories

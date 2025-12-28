@@ -86,6 +86,13 @@ void GameLogic::Initialize() {
     worldConfig_.waterLevel = config.GetFloat("world.water_level", 10.0f);
     worldConfig_.chunkUnloadDistance = config.GetFloat("world.chunk_unload_distance", 200.0f);
 
+    // Initialize loot systems
+    inventorySystem_ = std::make_unique<InventorySystem>();
+    lootTableManager_ = std::make_unique<LootTableManager>();
+
+    // Load loot tables
+    lootTableManager_->LoadLootTables("config/loot_tables.json");
+
     // Initialize 3D world systems
     InitializeWorldSystem();
     InitializeNPCSystem();
@@ -103,6 +110,20 @@ void GameLogic::Initialize() {
 
     // Register 3D world message handlers
     RegisterWorldHandlers();
+
+    // Register loot-related message handlers
+    RegisterHandler("loot_pickup", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleLootPickup(sessionId, data);});
+    RegisterHandler("inventory_move", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleInventoryMove(sessionId, data);});
+    RegisterHandler("item_use", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleItemUse(sessionId, data);});
+    RegisterHandler("item_drop", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleItemDrop(sessionId, data);});
+    RegisterHandler("trade_request", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleTradeRequest(sessionId, data);});
+    RegisterHandler("gold_transaction", [this](uint64_t sessionId, const nlohmann::json& data) {
+        HandleGoldTransaction(sessionId, data);});
 
     // Initialize Python scripting if enabled
     pythonEnabled_ = config.GetBool("python.enabled", false);
@@ -1283,3 +1304,93 @@ const GameLogic::WorldConfig& GameLogic::GetWorldConfig() const {
 
 // Note: Existing methods like HandleChat, HandleInventory, HandleQuest, etc.
 // remain largely unchanged as they are not directly affected by 3D world
+
+
+void GameLogic::HandleLootPickup(uint64_t sessionId, const nlohmann::json& data) {
+    try {
+        uint64_t playerId = GetPlayerIdFromSession(sessionId);
+        uint64_t lootEntityId = data["lootEntityId"];
+
+        // Get loot entity from world
+        GameEntity* lootEntity = GetEntity(lootEntityId);
+        if (!lootEntity || lootEntity->GetType() != EntityType::ITEM) {
+            SendError(sessionId, "Invalid loot entity");
+            return;
+        }
+
+        // Check distance
+        PlayerEntity* player = GetPlayerEntity(playerId);
+        if (!player) {
+            SendError(sessionId, "Player not found");
+            return;
+        }
+
+        float distance = glm::distance(player->GetPosition(), lootEntity->GetPosition());
+        if (distance > 5.0f) {
+            SendError(sessionId, "Too far to loot");
+            return;
+        }
+
+        // TODO: Get item from loot entity
+        // For now, generate random loot based on entity type
+        std::string lootTable = data.value("lootTable", "default");
+
+        auto lootItems = lootTableManager_->GenerateLoot(lootTable, player->GetLevel());
+
+        bool success = true;
+        for (const auto& [item, quantity] : lootItems) {
+            if (!inventorySystem_->AddItem(playerId, *item, quantity)) {
+                success = false;
+                break;
+            }
+        }
+
+        if (success) {
+            // Remove loot entity from world
+            entityManager_.DestroyEntity(lootEntityId);
+
+            // Send success response
+            SendSuccess(sessionId, "Loot collected", {
+                {"lootEntityId", lootEntityId},
+                {"items", lootItems.size()}
+            });
+
+            // Broadcast to nearby players
+            BroadcastToNearbyPlayers(player->GetPosition(), {
+                {"type", "entity_despawn"},
+                {"data", {{"entityId", lootEntityId}}}
+            }, 50.0f);
+        } else {
+            SendError(sessionId, "Inventory full");
+        }
+
+    } catch (const std::exception& e) {
+        Logger::Error("Error in HandleLootPickup: {}", e.what());
+        SendError(sessionId, "Internal server error");
+    }
+}
+
+void GameLogic::HandleInventoryMove(uint64_t sessionId, const nlohmann::json& data) {
+    try {
+        uint64_t playerId = GetPlayerIdFromSession(sessionId);
+        int fromSlot = data["fromSlot"];
+        int toSlot = data["toSlot"];
+
+        if (inventorySystem_->MoveItem(playerId, fromSlot, toSlot)) {
+            SendSuccess(sessionId, "Item moved");
+
+            // Send updated inventory
+            auto inventory = inventorySystem_->SerializeInventory(playerId);
+            SendRaw(sessionId, {
+                {"type", "inventory_update"},
+                {"data", inventory}
+            });
+        } else {
+            SendError(sessionId, "Cannot move item");
+        }
+
+    } catch (const std::exception& e) {
+        Logger::Error("Error in HandleInventoryMove: {}", e.what());
+        SendError(sessionId, "Internal server error");
+    }
+}

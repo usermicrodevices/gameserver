@@ -1,0 +1,108 @@
+{
+  "tables": [
+    {
+      "tableId": "goblin",
+      "name": "Goblin Loot Table",
+      "guaranteedDrops": 1,
+      "maxDrops": 3,
+      "uniqueDrops": false,
+      "goldMultiplier": 1.0,
+      "minGold": 5,
+      "maxGold": 20,
+      "entries": [
+        {
+          "itemId": "gold_coin",
+          "dropChance": 0.8,
+          "minQuantity": 1,
+          "maxQuantity": 5,
+          "minLevel": 1,
+          "maxLevel": 100,
+          "minRarity": 0,
+          "maxRarity": 0
+        },
+        {
+          "itemId": "goblin_ear",
+          "dropChance": 0.6,
+          "minQuantity": 1,
+          "maxQuantity": 2,
+          "minLevel": 1,
+          "maxLevel": 100,
+          "minRarity": 0,
+          "maxRarity": 0
+        },
+        {
+          "itemId": "rusty_sword",
+          "dropChance": 0.2,
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "minLevel": 1,
+          "maxLevel": 10,
+          "minRarity": 0,
+          "maxRarity": 1
+        },
+        {
+          "itemId": "health_potion_minor",
+          "dropChance": 0.3,
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "minLevel": 1,
+          "maxLevel": 100,
+          "minRarity": 0,
+          "maxRarity": 0
+        }
+      ]
+    },
+    {
+      "tableId": "dragon",
+      "name": "Dragon Loot Table",
+      "guaranteedDrops": 3,
+      "maxDrops": 8,
+      "uniqueDrops": true,
+      "goldMultiplier": 5.0,
+      "minGold": 1000,
+      "maxGold": 5000,
+      "entries": [
+        {
+          "itemId": "gold_coin",
+          "dropChance": 1.0,
+          "minQuantity": 100,
+          "maxQuantity": 500,
+          "minLevel": 30,
+          "maxLevel": 100,
+          "minRarity": 0,
+          "maxRarity": 0
+        },
+        {
+          "itemId": "dragon_scale",
+          "dropChance": 1.0,
+          "minQuantity": 5,
+          "maxQuantity": 20,
+          "minLevel": 30,
+          "maxLevel": 100,
+          "minRarity": 2,
+          "maxRarity": 4
+        },
+        {
+          "itemId": "dragon_heart",
+          "dropChance": 0.8,
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "minLevel": 30,
+          "maxLevel": 100,
+          "minRarity": 3,
+          "maxRarity": 5
+        },
+        {
+          "itemId": "legendary_sword",
+          "dropChance": 0.1,
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "minLevel": 40,
+          "maxLevel": 100,
+          "minRarity": 4,
+          "maxRarity": 5
+        }
+      ]
+    }
+  ]
+}

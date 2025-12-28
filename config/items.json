@@ -1,0 +1,75 @@
+{
+  "itemTemplates": [
+    {
+      "id": "gold_coin",
+      "name": "Gold Coin",
+      "description": "Shiny gold currency",
+      "type": 6,
+      "rarity": 0,
+      "maxStackSize": 9999,
+      "levelRequirement": 1,
+      "baseGoldValue": 1,
+      "tradable": true,
+      "droppable": true,
+      "sellable": false,
+      "iconTexture": "items/coin.png",
+      "stats": []
+    },
+    {
+      "id": "health_potion_minor",
+      "name": "Minor Health Potion",
+      "description": "Restores 50 health points",
+      "type": 2,
+      "rarity": 0,
+      "maxStackSize": 20,
+      "levelRequirement": 1,
+      "baseGoldValue": 10,
+      "tradable": true,
+      "droppable": true,
+      "sellable": true,
+      "iconTexture": "items/potion_red.png",
+      "stats": [
+        {
+          "statName": "healthRestore",
+          "baseValue": 50,
+          "currentValue": 50,
+          "maxValue": 50
+        }
+      ]
+    },
+    {
+      "id": "legendary_sword",
+      "name": "Sword of the Dragon",
+      "description": "Forged from dragon scales, this sword burns with eternal flame",
+      "type": 0,
+      "rarity": 4,
+      "maxStackSize": 1,
+      "levelRequirement": 40,
+      "baseGoldValue": 5000,
+      "tradable": false,
+      "droppable": true,
+      "sellable": false,
+      "iconTexture": "items/sword_dragon.png",
+      "stats": [
+        {
+          "statName": "attackDamage",
+          "baseValue": 100,
+          "currentValue": 100,
+          "maxValue": 100
+        },
+        {
+          "statName": "fireDamage",
+          "baseValue": 50,
+          "currentValue": 50,
+          "maxValue": 50
+        },
+        {
+          "statName": "criticalChance",
+          "baseValue": 0.15,
+          "currentValue": 0.15,
+          "maxValue": 0.15
+        }
+      ]
+    }
+  ]
+}
