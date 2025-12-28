@@ -9,8 +9,9 @@
 #include <mutex>
 #include <shared_mutex>
 #include <nlohmann/json.hpp>
-#include "config/ConfigManager.hpp"
-#include "logging/Logger.hpp"
+
+#include "../../include/config/ConfigManager.hpp"
+#include "../../include/logging/Logger.hpp"
 
 // Forward declarations
 class Player;

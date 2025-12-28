@@ -1,9 +1,10 @@
 #pragma once
 
-#include "GameSession.hpp"
 #include <unordered_set>
 #include <shared_mutex>
 #include <atomic>
+
+#include "../../include/network/GameSession.hpp"
 
 class ConnectionManager {
 public:

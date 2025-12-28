@@ -1,9 +1,10 @@
 #pragma once
 
-#include "DatabasePool.hpp"
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+
+#include "../../include/database/DatabasePool.hpp"
 
 struct ShardInfo {
     int shard_id;

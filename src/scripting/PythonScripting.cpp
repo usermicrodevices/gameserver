@@ -1,7 +1,8 @@
-#include "scripting/PythonScripting.hpp"
 #include <filesystem>
 #include <chrono>
 #include <thread>
+
+#include "../../include/scripting/PythonScripting.hpp"
 
 namespace fs = std::filesystem;
 

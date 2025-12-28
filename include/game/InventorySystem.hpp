@@ -5,7 +5,8 @@
 #include <memory>
 #include <mutex>
 #include "LootItem.hpp"
-#include "../database/CitusClient.hpp"
+
+#include "../../include/database/CitusClient.hpp"
 
 struct InventorySlot {
     std::shared_ptr<LootItem> item;

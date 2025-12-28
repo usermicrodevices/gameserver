@@ -1,12 +1,13 @@
-#include "database/CitusClient.hpp"
-#include "config/ConfigManager.hpp"
-#include "logging/Logger.hpp"
 #include <cstring>
 #include <sstream>
 #include <iomanip>
 #include <chrono>
 #include <thread>
 #include <random>
+
+#include "../../include/database/CitusClient.hpp"
+#include "../../include/config/ConfigManager.hpp"
+#include "../../include/logging/Logger.hpp"
 
 // =============== CitusClient Implementation ===============
 

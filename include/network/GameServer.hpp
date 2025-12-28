@@ -4,7 +4,8 @@
 #include <memory>
 #include <string>
 #include <functional>
-#include "../config/ConfigManager.hpp"
+
+#include "../../include/config/ConfigManager.hpp"
 
 class GameServer {
 public:

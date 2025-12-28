@@ -11,13 +11,14 @@
 #include <cmath>
 #include <random>
 #include <glm/glm.hpp>
+
 #include "PlayerManager.hpp"
-#include "PythonScripting.hpp"
 #include "WorldChunk.hpp"
 #include "NPCSystem.hpp"
 #include "MobSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "EntityManager.hpp"
+#include "../../include/scripting/PythonScripting.hpp"
 
 class GameLogic {
 public:

@@ -1,7 +1,8 @@
-#include "game/LootTable.hpp"
-#include "logging/Logger.hpp"
 #include <fstream>
 #include <algorithm>
+
+#include "../../include/game/LootTable.hpp"
+#include "../../include/logging/Logger.hpp"
 
 nlohmann::json LootEntry::Serialize() const {
     return {

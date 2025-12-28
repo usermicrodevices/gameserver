@@ -50,7 +50,7 @@ class NPCEntity : public GameEntity {
 public:
     NPCEntity(NPCType type, const glm::vec3& position, uint64_t ownerId = 0);
 
-    NPCType GetType() const { return type_; }
+    //NPCType GetType() const { return type_; }
     NPCBehaviorState GetBehaviorState() const { return behaviorState_; }
     const NPCStats& GetStats() const { return stats_; }
     NPCStats& GetStats() { return stats_; }
@@ -93,7 +93,7 @@ public:
     void Deserialize(const nlohmann::json& data) override;
 
 private:
-    NPCType type_;
+    //NPCType type_;
     NPCBehaviorState behaviorState_ = NPCBehaviorState::IDLE;
     NPCStats stats_;
 

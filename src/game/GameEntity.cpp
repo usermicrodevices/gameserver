@@ -1,5 +1,6 @@
-#include "game/GameEntity.hpp"
 #include <random>
+
+#include "../../include/game/GameEntity.hpp"
 
 static std::atomic<uint64_t> nextEntityId(1);
 

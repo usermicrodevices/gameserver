@@ -1,9 +1,10 @@
-#include "network/GameSession.hpp"
-#include "logging/Logger.hpp"
 #include <functional>
 #include <system_error>
 #include <cstring>
 #include <iomanip>
+
+#include "../../include/network/GameSession.hpp"
+#include "../../include/logging/Logger.hpp"
 
 // =============== Static Member Initialization ===============
 

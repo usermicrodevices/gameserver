@@ -1,9 +1,10 @@
-#include "database/DatabasePool.hpp"
-#include "logging/Logger.hpp"
 #include <cstring>
 #include <chrono>
 #include <thread>
 #include <algorithm>
+
+#include "../../include/database/DatabasePool.hpp"
+#include "../../include/logging/Logger.hpp"
 
 // =============== DatabaseConnection Implementation ===============
 

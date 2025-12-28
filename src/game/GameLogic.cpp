@@ -5,17 +5,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/noise.hpp>
 
-#include "game/GameLogic.hpp"
-#include "config/ConfigManager.hpp"
-#include "logging/Logger.hpp"
-#include "database/CitusClient.hpp"
-#include "scripting/PythonScripting.hpp"
-#include "game/WorldChunk.hpp"
-#include "game/WorldGenerator.hpp"
-#include "game/NPCSystem.hpp"
-#include "game/MobSystem.hpp"
-#include "game/CollisionSystem.hpp"
-#include "game/EntityManager.hpp"
+#include "../../include/game/WorldChunk.hpp"
+#include "../../include/game/WorldGenerator.hpp"
+#include "../../include/game/NPCSystem.hpp"
+#include "../../include/game/MobSystem.hpp"
+#include "../../include/game/CollisionSystem.hpp"
+#include "../../include/game/EntityManager.hpp"
+#include "../../include/game/GameLogic.hpp"
+#include "../../include/config/ConfigManager.hpp"
+#include "../../include/logging/Logger.hpp"
+#include "../../include/database/CitusClient.hpp"
+#include "../../include/scripting/PythonScripting.hpp"
 
 // =============== Constants ===============
 const float BROADCAST_RANGE = 100.0f;

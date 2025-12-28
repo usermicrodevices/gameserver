@@ -3,7 +3,8 @@
 #include <vector>
 #include <random>
 #include <unordered_map>
-#include "LootItem.hpp"
+
+#include "../../include/game/LootItem.hpp"
 
 struct LootEntry {
     std::string itemId;

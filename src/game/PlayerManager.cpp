@@ -1,9 +1,10 @@
-#include "game/PlayerManager.hpp"
-#include "logging/Logger.hpp"
-#include "database/CitusClient.hpp"
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+
+#include "../../include/game/PlayerManager.hpp"
+#include "../../include/logging/Logger.hpp"
+#include "../../include/database/CitusClient.hpp"
 
 // =============== Player Implementation ===============
 

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "NPCSystem.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 #include <unordered_map>
 #include <chrono>
 #include <random>
+
+#include "../../include/game/NPCSystem.hpp"
 
 // Loot item structure
 struct LootItem {

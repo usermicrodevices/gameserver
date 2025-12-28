@@ -4,7 +4,8 @@
 #include <vector>
 #include <memory>
 #include <unordered_set>
-#include "WorldChunk.hpp"
+
+#include "../../include/game/WorldChunk.hpp"
 
 struct RaycastHit {
     bool hit = false;

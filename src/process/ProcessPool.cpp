@@ -1,10 +1,11 @@
-#include "process/ProcessPool.hpp"
-#include "logging/Logger.hpp"
 #include <sys/wait.h>
 #include <sys/prctl.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+
+#include "../../include/process/ProcessPool.hpp"
+#include "../../include/logging/Logger.hpp"
 
 ProcessPool::ProcessPool(int numProcesses)
 : numProcesses_(numProcesses) {
