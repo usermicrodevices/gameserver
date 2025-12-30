@@ -1,0 +1,32 @@
+{
+    "reconnection": {
+        "enabled": true,
+        "maxAttempts": 5,
+        "initialDelay": 1000,
+        "maxDelay": 30000,
+        "backoffFactor": 1.5
+    },
+    "heartbeat": {
+        "enabled": true,
+        "interval": 5000,
+        "timeout": 10000
+    },
+    "timeouts": {
+        "connect": 5000,
+        "response": 10000,
+        "handshake": 3000
+    },
+    "optimization": {
+        "compression": true,
+        "batchMessages": true,
+        "maxBatchSize": 10,
+        "priorityQueue": true,
+        "maxQueueSize": 1000
+    },
+    "monitoring": {
+        "enabled": true,
+        "sampleInterval": 1000,
+        "historySize": 100,
+        "qualityThreshold": 70
+    }
+}

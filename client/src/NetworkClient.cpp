@@ -1,8 +1,9 @@
-#include "NetworkClient.h"
+#include <iostream>
 #include <asio/connect.hpp>
 #include <asio/write.hpp>
 #include <asio/read_until.hpp>
-#include <iostream>
+
+#include "../include/client/NetworkClient.h"
 
 NetworkClient::NetworkClient()
     : socket_(ioContext_),
@@ -289,3 +290,26 @@ nlohmann::json NetworkClient::BuildInventoryAction(const std::string& itemId, in
         {"action", action}
     };
 }
+
+void NetworkClient::HandleConnectionResult(bool success) {
+    if (success) {
+        stateManager_->TransitionTo(ConnectionState::Connected);
+        stateManager_->RecordConnectAttempt();
+    } else {
+        stateManager_->TransitionTo(ConnectionState::Error, ConnectionError::Timeout);
+
+        // Check if we should reconnect
+        if (stateManager_->ShouldAttemptReconnect()) {
+            auto delay = stateManager_->GetNextReconnectDelay();
+            // Schedule reconnection after delay
+        }
+    }
+}
+
+// Register for state change notifications
+stateManager_->SetStateCallback([](ConnectionState state, ConnectionError error) {
+    std::cout << "Connection state changed to: "
+    << ConnectionStateToString(state)
+    << " (Error: " << ConnectionErrorToString(error) << ")"
+    << std::endl;
+});

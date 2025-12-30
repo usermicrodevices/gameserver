@@ -1,9 +1,10 @@
-#include "ClientApp.h"
-#include "ClientFrame.h"
+#include <iostream>
 #include <wx/config.h>
 #include <wx/stdpaths.h>
 #include <wx/log.h>
-#include <iostream>
+
+#include "../include/client/ClientApp.hpp"
+#include "../include/client/ClientFrame.hpp"
 
 wxIMPLEMENT_APP(ClientApp);
 

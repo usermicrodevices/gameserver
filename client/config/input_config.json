@@ -1,0 +1,22 @@
+{
+    "mouseSensitivity": 0.1,
+    "mouseAcceleration": false,
+    "invertMouseY": false,
+    "keyboardRepeatDelay": 250,
+    "keyboardRepeatRate": 30,
+    "gamepadEnabled": true,
+    "gamepadDeadzone": 0.1,
+    "actionMappings": {
+        "moveForward": ["KEY_W", "GAMEPAD_DPAD_UP"],
+        "moveBackward": ["KEY_S", "GAMEPAD_DPAD_DOWN"],
+        "moveLeft": ["KEY_A", "GAMEPAD_DPAD_LEFT"],
+        "moveRight": ["KEY_D", "GAMEPAD_DPAD_RIGHT"],
+        "jump": ["KEY_SPACE", "GAMEPAD_A"],
+        "crouch": ["KEY_CTRL", "GAMEPAD_B"],
+        "interact": ["KEY_E", "GAMEPAD_X"],
+        "inventory": ["KEY_TAB", "GAMEPAD_Y"]
+    },
+    "uiScale": 1.0,
+    "chatKey": "KEY_ENTER",
+    "screenshotKey": "KEY_F12"
+}
