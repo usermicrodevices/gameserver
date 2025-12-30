@@ -1,0 +1,10 @@
+kivy==2.3.0
+kivy-garden
+ogre-python==1.12.6
+python-ogre==1.12.6
+pyyaml==6.0.1
+websocket-client==1.7.0
+msgpack==1.0.7
+numpy==1.26.4
+pillow==10.2.0
+pyopengl==3.1.7
