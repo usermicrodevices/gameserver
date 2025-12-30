@@ -6,17 +6,9 @@
 #include <chrono>
 #include <random>
 
+#include "../../include/game/LootItem.hpp"
+#include "../../include/game/LootTable.hpp"
 #include "../../include/game/NPCSystem.hpp"
-
-// Loot item structure
-struct LootItem {
-    std::string itemId;
-    int minQuantity = 1;
-    int maxQuantity = 1;
-    float dropChance = 1.0f; // 0.0 to 1.0
-    int minLevel = 1;
-    int maxLevel = 100;
-};
 
 // Mob spawn zone
 struct MobSpawnZone {
@@ -37,7 +29,7 @@ struct MobVariant {
     float healthMultiplier = 1.0f;
     float damageMultiplier = 1.0f;
     float experienceReward = 10.0f;
-    std::vector<LootItem> lootTable;
+    LootTable lootTable;
 };
 
 // Mob death info for rewards
