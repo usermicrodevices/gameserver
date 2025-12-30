@@ -1300,66 +1300,108 @@ const GameLogic::WorldConfig& GameLogic::GetWorldConfig() const {
     return worldConfig_;
 }
 
-// ... rest of existing methods remain the same with minor adjustments for 3D ...
+// Add this method to GameLogic class
+void GameLogic::CreateLootEntity(const glm::vec3& position, std::shared_ptr<LootItem> item, int quantity) {
+    // Create a new entity for the loot
+    uint64_t entityId = entityManager_.CreateEntity(EntityType::ITEM, position);
 
-// Note: Existing methods like HandleChat, HandleInventory, HandleQuest, etc.
-// remain largely unchanged as they are not directly affected by 3D world
+    // TODO: Attach the LootItem data to the entity
+    // This would require extending the GameEntity system to support item data
 
+    // For now, just log it
+    Logger::Debug("Created loot entity {} at [{:.1f}, {:.1f}, {:.1f}]: {} x{}",
+                  entityId, position.x, position.y, position.z,
+                  item->GetName(), quantity);
+
+    // Register in collision system
+    BoundingSphere bounds{position, 0.5f}; // Small collision radius for loot
+    collisionSystem_->RegisterEntity(entityId, bounds, CollisionType::TRIGGER);
+
+    // Broadcast to nearby players
+    nlohmann::json spawnEvent = {
+        {"type", "loot_spawn"},
+        {"entityId", entityId},
+        {"position", {position.x, position.y, position.z}},
+        {"itemId", item->GetId()},
+        {"itemName", item->GetName()},
+        {"quantity", quantity},
+        {"rarity", static_cast<int>(item->GetRarity())},
+        {"timestamp", GetCurrentTimestamp()}
+    };
+
+    BroadcastToNearbyPlayers(position, spawnEvent, 100.0f);
+}
 
 void GameLogic::HandleLootPickup(uint64_t sessionId, const nlohmann::json& data) {
     try {
-        uint64_t playerId = GetPlayerIdFromSession(sessionId);
-        uint64_t lootEntityId = data["lootEntityId"];
+        uint64_t playerId = GetPlayerIdBySession(sessionId);
+        uint64_t lootEntityId = data.value("lootEntityId", 0ULL);
 
-        // Get loot entity from world
+        if (lootEntityId == 0) {
+            SendError(sessionId, "Invalid loot entity ID");
+            return;
+        }
+
         GameEntity* lootEntity = GetEntity(lootEntityId);
         if (!lootEntity || lootEntity->GetType() != EntityType::ITEM) {
             SendError(sessionId, "Invalid loot entity");
             return;
         }
 
-        // Check distance
         PlayerEntity* player = GetPlayerEntity(playerId);
         if (!player) {
             SendError(sessionId, "Player not found");
             return;
         }
 
+        // Check distance
         float distance = glm::distance(player->GetPosition(), lootEntity->GetPosition());
         if (distance > 5.0f) {
             SendError(sessionId, "Too far to loot");
             return;
         }
 
-        // TODO: Get item from loot entity
-        // For now, generate random loot based on entity type
-        std::string lootTable = data.value("lootTable", "default");
+        // TODO: Get actual item data from the loot entity
+        // For now, create a dummy item
+        auto lootItem = std::make_shared<LootItem>(
+            "dummy_item",
+            "Treasure",
+            ItemType::MATERIAL,
+            LootRarity::COMMON
+        );
 
-        auto lootItems = lootTableManager_->GenerateLoot(lootTable, player->GetLevel());
+        int quantity = data.value("quantity", 1);
 
-        bool success = true;
-        for (const auto& [item, quantity] : lootItems) {
-            if (!inventorySystem_->AddItem(playerId, *item, quantity)) {
-                success = false;
-                break;
-            }
-        }
-
-        if (success) {
+        // Add to inventory
+        if (inventorySystem_->AddItem(playerId, *lootItem, quantity)) {
             // Remove loot entity from world
             entityManager_.DestroyEntity(lootEntityId);
+            collisionSystem_->UnregisterEntity(lootEntityId);
 
             // Send success response
             SendSuccess(sessionId, "Loot collected", {
                 {"lootEntityId", lootEntityId},
-                {"items", lootItems.size()}
+                {"item", lootItem->GetName()},
+                        {"quantity", quantity}
             });
 
             // Broadcast to nearby players
             BroadcastToNearbyPlayers(player->GetPosition(), {
                 {"type", "entity_despawn"},
-                {"data", {{"entityId", lootEntityId}}}
+                {"entityId", lootEntityId}
             }, 50.0f);
+
+            // Fire Python event
+            FirePythonEvent("loot_pickup", {
+                {"playerId", playerId},
+                {"itemId", lootItem->GetId()},
+                            {"quantity", quantity},
+                            {"position", {
+                                player->GetPosition().x,
+                            player->GetPosition().y,
+                            player->GetPosition().z
+                            }}
+            });
         } else {
             SendError(sessionId, "Inventory full");
         }

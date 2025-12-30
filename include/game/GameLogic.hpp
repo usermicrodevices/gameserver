@@ -12,12 +12,13 @@
 #include <random>
 #include <glm/glm.hpp>
 
-#include "PlayerManager.hpp"
-#include "WorldChunk.hpp"
-#include "NPCSystem.hpp"
-#include "MobSystem.hpp"
-#include "CollisionSystem.hpp"
-#include "EntityManager.hpp"
+#include "../../include/game/LootItem.hpp"
+#include "../../include/game/PlayerManager.hpp"
+#include "../../include/game/WorldChunk.hpp"
+#include "../../include/game/NPCSystem.hpp"
+#include "../../include/game/MobSystem.hpp"
+#include "../../include/game/CollisionSystem.hpp"
+#include "../../include/game/EntityManager.hpp"
 #include "../../include/scripting/PythonScripting.hpp"
 
 class GameLogic {
@@ -78,6 +79,7 @@ public:
     NPCEntity* GetNPCEntity(uint64_t npcId);
 
     // Loot management
+    void CreateLootEntity(const glm::vec3& position, std::shared_ptr<LootItem> item, int quantity);
     void HandleLootPickup(uint64_t sessionId, const nlohmann::json& data);
     void HandleInventoryMove(uint64_t sessionId, const nlohmann::json& data);
     void HandleItemUse(uint64_t sessionId, const nlohmann::json& data);

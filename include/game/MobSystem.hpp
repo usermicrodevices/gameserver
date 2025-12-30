@@ -1,3 +1,4 @@
+// MobSystem.hpp
 #pragma once
 
 #include <glm/glm.hpp>
@@ -6,9 +7,8 @@
 #include <chrono>
 #include <random>
 
-#include "../../include/game/LootItem.hpp"
+#include "../../include/game/WorldChunk.hpp"
 #include "../../include/game/LootTable.hpp"
-#include "../../include/game/NPCSystem.hpp"
 
 // Mob spawn zone
 struct MobSpawnZone {
@@ -20,6 +20,7 @@ struct MobSpawnZone {
     int maxMobs = 10;
     float respawnTime = 30.0f; // seconds
     std::string name;
+    std::string lootTableId;  // Add loot table reference
 };
 
 // Mob variant (leveled version of a mob type)
@@ -29,7 +30,7 @@ struct MobVariant {
     float healthMultiplier = 1.0f;
     float damageMultiplier = 1.0f;
     float experienceReward = 10.0f;
-    LootTable lootTable;
+    std::string lootTableId;  // Reference to loot table
 };
 
 // Mob death info for rewards
@@ -40,6 +41,7 @@ struct MobDeathInfo {
     int level = 1;
     glm::vec3 deathPosition;
     std::chrono::steady_clock::time_point deathTime;
+    std::string lootTableId;
 };
 
 class MobSystem {
@@ -65,7 +67,7 @@ public:
     MobVariant GetMobVariant(NPCType type, int level) const;
 
     // Loot system
-    std::vector<LootItem> GenerateLoot(NPCType type, int level) const;
+    std::vector<std::pair<std::shared_ptr<LootItem>, int>> GenerateLoot(NPCType type, int level, uint64_t killerId = 0) const;
     void DropLoot(const MobDeathInfo& deathInfo);
 
     // Experience rewards
@@ -83,7 +85,8 @@ public:
 
     // Configuration
     void LoadMobConfig(const nlohmann::json& config);
-    void SetDefaultLootTable(NPCType type, const std::vector<LootItem>& lootTable);
+    void SetMobLootTable(NPCType type, const std::string& lootTableId);
+    void SetZoneLootTable(const std::string& zoneName, const std::string& lootTableId);
 
 private:
     MobSystem() = default;
@@ -99,8 +102,9 @@ private:
     // Mob variants
     std::unordered_map<std::string, MobVariant> mobVariants_; // "TYPE_LEVEL" -> variant
 
-    // Loot tables
-    std::unordered_map<NPCType, std::vector<LootItem>> defaultLootTables_;
+    // Loot table references
+    std::unordered_map<NPCType, std::string> mobLootTables_; // mob type -> loot table ID
+    std::unordered_map<std::string, std::string> zoneLootTables_; // zone name -> loot table ID
 
     // Respawn queue
     struct PendingRespawn {
@@ -120,9 +124,10 @@ private:
 
     // Helper methods
     std::string GetVariantKey(NPCType type, int level) const;
+    std::string GetLootTableIdForMob(NPCType type, const std::string& zoneName = "") const;
     void InitializeDefaultLootTables();
     void InitializeDefaultVariants();
     int CalculateMobLevel(const glm::vec3& position) const;
     glm::vec3 GetRandomSpawnPosition(const MobSpawnZone& zone) const;
+    void CreateLootEntity(const glm::vec3& position, std::shared_ptr<LootItem> item, int quantity);
 };
-
