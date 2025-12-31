@@ -1,0 +1,47 @@
+{
+  "network": {
+    "defaultHost": "192.168.1.100",
+    "defaultPort": 8080,
+    "timeoutMs": 5000,
+    "reconnectAttempts": 3,
+    "reconnectDelayMs": 1000,
+    "compression": true,
+    "encryption": false
+  },
+  "graphics": {
+    "resolutionScale": 1.0,
+    "shadowQuality": 1,
+    "textureQuality": 2,
+    "antiAliasing": 1,
+    "viewDistance": 100.0,
+    "fpsLimit": 60,
+    "vsync": true,
+    "fullscreen": true
+  },
+  "controls": {
+    "touchSensitivity": 0.01,
+    "invertY": false,
+    "virtualJoystickSize": 100.0,
+    "buttonScale": 1.0,
+    "tapThreshold": 0.3,
+    "holdThreshold": 0.5
+  },
+  "audio": {
+    "masterVolume": 1.0,
+    "musicVolume": 0.8,
+    "sfxVolume": 1.0,
+    "voiceVolume": 1.0,
+    "enable3DAudio": true
+  },
+  "game": {
+    "language": "en",
+    "showTutorial": true,
+    "autoLoot": false,
+    "autoAttack": false,
+    "showDamageNumbers": true,
+    "showPlayerNames": true,
+    "showNPCNames": true,
+    "chatOpacity": 0.8,
+    "minimapSize": 150.0
+  }
+}
