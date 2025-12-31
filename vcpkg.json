@@ -1,0 +1,112 @@
+{
+  "name": "GameServer",
+  "description": "C++ game server with multi-process architecture, PostgreSQL sharding via Citus, and Python scripting support",
+  "version": "1.0.0",
+  "language": "C++17",
+  "compiler": {
+    "minimum": "gcc 9.0+ or clang 10.0+",
+    "cxx_standard": 17
+  },
+  "dependencies": {
+    "asio": {
+      "version": "1.28.0",
+      "description": "Standalone ASIO library (non-Boost version)",
+      "usage": "Networking and asynchronous I/O",
+      "fetch_method": "git clone https://github.com/chriskohlhoff/asio.git",
+      "build_requirements": "Header-only library, no build required"
+    },
+    "libpq": {
+      "version": "15.0+",
+      "description": "PostgreSQL C client library",
+      "usage": "Database connectivity",
+      "install_command_ubuntu": "sudo apt-get install libpq-dev",
+      "install_command_macos": "brew install libpq"
+    },
+    "nlohmann-json": {
+      "version": "3.11.2",
+      "description": "JSON library for modern C++",
+      "usage": "JSON serialization/deserialization",
+      "fetch_method": "git clone https://github.com/nlohmann/json.git",
+      "build_requirements": "Header-only library, no build required"
+    },
+    "spdlog": {
+      "version": "1.12.0",
+      "description": "Fast C++ logging library",
+      "usage": "Logging throughout the application",
+      "fetch_method": "git clone https://github.com/gabime/spdlog.git",
+      "build_requirements": "CMake build required"
+    },
+    "python3": {
+      "version": "3.8+",
+      "description": "Python interpreter and development headers",
+      "usage": "Python scripting engine integration",
+      "install_command_ubuntu": "sudo apt-get install python3-dev",
+      "install_command_macos": "brew install python@3.9"
+    },
+    "glm": {
+      "version": "0.9.9.8",
+      "description": "Mathematics library for graphics software",
+      "usage": "Vector and matrix operations for game world",
+      "fetch_method": "git clone https://github.com/g-truc/glm.git",
+      "build_requirements": "Header-only library, no build required"
+    }
+  },
+  "system_requirements": {
+    "libraries": [
+      "pthread",
+      "dl",
+      "m"
+    ],
+    "postgresql": {
+      "version": "15.0+",
+      "extensions": ["citus"],
+      "setup_notes": "Citus extension required for distributed tables"
+    },
+    "operating_systems": ["Linux", "macOS"]
+  },
+  "build_system": "CMake",
+  "cmake_minimum_version": "3.16",
+  "project_structure": {
+    "include_directories": [
+      "include/",
+      "thirdparty/asio/include/",
+      "thirdparty/spdlog/include/",
+      "thirdparty/json/include/",
+      "thirdparty/glm/",
+      "/usr/include/postgresql/"
+    ],
+    "link_directories": [
+      "/usr/lib/x86_64-linux-gnu/",
+      "/usr/local/lib/"
+    ],
+    "libraries_to_link": [
+      "pq",
+      "pthread",
+      "dl",
+      "m",
+      "python3.9"
+    ]
+  },
+  "optional_features": {
+    "compression": "Requires zlib development headers",
+    "ssl_support": "Requires OpenSSL development headers",
+    "profiling": "gperftools or similar for performance analysis"
+  },
+  "platform_notes": {
+    "linux": {
+      "additional_packages": [
+        "libssl-dev",
+        "zlib1g-dev",
+        "build-essential",
+        "pkg-config"
+      ]
+    },
+    "macos": {
+      "additional_packages": [
+        "openssl",
+        "pkg-config"
+      ],
+      "notes": "Python3 may need explicit linking with -lpython3.9"
+    }
+  }
+}
