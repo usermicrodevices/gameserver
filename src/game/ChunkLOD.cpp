@@ -1,7 +1,8 @@
-#include "ChunkLOD.hpp"
-#include "WorldGenerator.hpp"
-#include <glm/gtc/noise.hpp>
 #include <chrono>
+#include <glm/gtc/noise.hpp>
+
+#include "../../include/game/ChunkLOD.hpp"
+#include "../../include/game/WorldGenerator.hpp"
 
 LODChunk::LODChunk(int x, int z, ChunkLOD lod)
     : WorldChunk(x, z, lod), lod_(lod) {

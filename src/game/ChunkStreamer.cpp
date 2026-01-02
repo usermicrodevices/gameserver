@@ -1,8 +1,9 @@
-#include "ChunkStreamer.hpp"
-#include "WorldGenerator.hpp"
 #include <chrono>
 #include <future>
 #include <algorithm>
+
+#include "../../include/game/ChunkStreamer.hpp"
+#include "../../include/game/WorldGenerator.hpp"
 
 ChunkStreamer::ChunkStreamer(std::shared_ptr<ChunkPool> pool,
                              std::shared_ptr<ChunkCache> cache,

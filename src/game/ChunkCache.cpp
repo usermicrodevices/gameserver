@@ -1,9 +1,10 @@
-#include "ChunkCache.hpp"
 #include <zlib.h>
 #include <fstream>
 #include <filesystem>
 #include <sstream>
 #include <iomanip>
+
+#include "../../include/game/ChunkCache.hpp"
 
 ChunkCache::ChunkCache(const CacheConfig& config) 
     : config_(config) {

@@ -80,92 +80,199 @@ This is a **3D multiplayer game server** built in C++17 with Python scripting su
 ## Directory Structure
 
 ```
-gameserver-main/
+gameserver/
 │
-├── CMakeLists.txt              # Build configuration
-├── README.md                   # Project documentation
-├── LICENSE                     # License file
-│
-├── config/                     # Configuration files
-│   └── config.json            # Main server configuration
-│
-├── include/                    # Header files (C++)
-│   ├── config/
-│   │   └── ConfigManager.hpp  # Configuration management
-│   │
-│   ├── database/
-│   │   ├── CitusClient.hpp    # Distributed database client
-│   │   └── DatabasePool.hpp   # Connection pooling
-│   │
-│   ├── game/
-│   │   ├── CollisionSystem.hpp    # 3D collision detection
-│   │   ├── EntityManager.hpp      # Entity lifecycle management
-│   │   ├── GameLogic.hpp          # Core game logic orchestrator
-│   │   ├── NPCSystem.hpp          # NPC AI and behaviors
-│   │   ├── PlayerManager.hpp      # Player state management
-│   │   ├── WorldChunk.hpp         # Chunk data structure
-│   │   └── WorldGenerator.hpp     # Procedural world generation
-│   │
-│   ├── logging/
-│   │   └── Logger.hpp         # Logging facade (spdlog wrapper)
-│   │
-│   ├── network/
-│   │   ├── ConnectionManager.hpp  # Connection lifecycle
-│   │   ├── GameServer.hpp         # ASIO server implementation
-│   │   └── GameSession.hpp        # Per-client session handling
-│   │
-│   ├── process/
-│   │   └── ProcessPool.hpp    # Multi-process worker pool
-│   │
-│   └── scripting/
-│       ├── PythonEvent.hpp        # Python event system
-│       ├── PythonModule.hpp       # Python module loader
-│       └── PythonScripting.hpp    # Python engine integration
-│
-├── src/                       # Implementation files (C++)
-│   ├── main.cpp              # Application entry point
-│   │
-│   ├── config/
-│   │   └── ConfigManager.cpp
-│   │
-│   ├── database/
-│   │   ├── CitusClient.cpp
-│   │   └── DatabasePool.cpp
-│   │
-│   ├── game/
-│   │   ├── GameLogic.cpp
-│   │   ├── PlayerManager.cpp
-│   │   └── WorldChunk.cpp
-│   │
-│   ├── logging/
-│   │   └── Logger.cpp
-│   │
-│   ├── network/
-│   │   ├── ConnectionManager.cpp
-│   │   ├── GameServer.cpp
-│   │   └── GameSession.cpp
-│   │
-│   ├── process/
-│   │   └── ProcessPool.cpp
-│   │
-│   └── scripting/
-│       ├── PythonAPI.cpp         # C++ functions exposed to Python
-│       └── PythonScripting.cpp
-│
-├── scripts/                   # Python game scripts
-│   ├── client/
-│   │   └── ui_handlers.py    # Client UI event handlers
-│   │
-│   ├── server/
-│   │   └── game_logic.py     # Server-side game logic
-│   │
-│   ├── game_events.py        # Game event handlers
-│   └── quests.py             # Quest system implementation
-│
-└── examples/                  # Example code
-    ├── logging.json          # Logging configuration example
-    ├── server.cpp            # Server setup example
-    └── test.py               # Python API test script
+├── ARCHITECTURE_DIAGRAM.md
+├── build.sh
+├── clients
+│   ├── agdk-imgui
+│   │   ├── AndroidManifest.xml
+│   │   ├── assets
+│   │   │   ├── config
+│   │   │   │   └── config.json
+│   │   │   └── shaders
+│   │   │       ├── basic.frag
+│   │   │       └── basic.vert
+│   │   ├── build.gradle
+│   │   ├── CMakeLists.txt
+│   │   ├── include
+│   │   │   ├── EntityState.hpp
+│   │   │   ├── GameClient.hpp
+│   │   │   ├── GameState.hpp
+│   │   │   ├── InputHandler.hpp
+│   │   │   ├── NetworkClient.hpp
+│   │   │   ├── Renderer.hpp
+│   │   │   ├── ShaderProgram.hpp
+│   │   │   ├── TextureManager.hpp
+│   │   │   └── UIManager.hpp
+│   │   └── src
+│   │       ├── AndroidMain.cpp
+│   │       ├── EntityState.cpp
+│   │       ├── GameClient.cpp
+│   │       ├── GameState.cpp
+│   │       ├── InputHandler.cpp
+│   │       ├── NetworkClient.cpp
+│   │       ├── Renderer.cpp
+│   │       ├── ShaderProgram.cpp
+│   │       ├── TextureManager.cpp
+│   │       └── UIManager.cpp
+│   ├── ogre3d-py
+│   │   ├── game
+│   │   │   └── __init__.py
+│   │   ├── gui
+│   │   │   ├── __init__.py
+│   │   │   └── input.py
+│   │   ├── main.py
+│   │   ├── network
+│   │   │   ├── __init__.py
+│   │   │   └── protocol.py
+│   │   ├── README.MD
+│   │   ├── renderer
+│   │   │   └── __init__.py
+│   │   ├── requirements.txt
+│   │   ├── run_client.bat
+│   │   ├── run_client.sh
+│   │   └── setup.py
+│   └── wx-cpp
+│       ├── build.sh
+│       ├── CMakeLists.txt
+│       ├── config
+│       │   ├── input_config.json
+│       │   └── network_config.json
+│       ├── include
+│       │   ├── client
+│       │   │   ├── Camera.hpp
+│       │   │   ├── ClientFrame.hpp
+│       │   │   ├── ConnectionState.hpp
+│       │   │   ├── EventDispatcher.hpp
+│       │   │   ├── GameClient.hpp
+│       │   │   ├── GLCanvas.hpp
+│       │   │   ├── InputEvents.hpp
+│       │   │   ├── InputManager.hpp
+│       │   │   ├── NetworkClient.hpp
+│       │   │   ├── NetworkMonitor.hpp
+│       │   │   ├── RenderSystem.hpp
+│       │   │   └── UIComponents.hpp
+│       │   └── python
+│       │       ├── PythonScriptManager.hpp
+│       │       └── ScriptBindings.hpp
+│       ├── resources
+│       │   ├── config
+│       │   ├── shaders
+│       │   └── textures
+│       ├── scripts
+│       │   └── game_scripts.py
+│       ├── src
+│       │   ├── ClientApp.cpp
+│       │   ├── ClientFrame.cpp
+│       │   ├── ConnectionState.cpp
+│       │   ├── EventDispatcher.cpp
+│       │   ├── GameClient.cpp
+│       │   ├── GameWorld.cpp
+│       │   ├── GLCanvas.cpp
+│       │   ├── InputManager.cpp
+│       │   ├── main.cpp
+│       │   ├── NetworkClient.cpp
+│       │   └── python
+│       │       └── PythonScriptManager.cpp
+│       └── STRUCTURE.md
+├── CMakeLists.txt
+├── config
+│   ├── config.json
+│   ├── items.json
+│   └── loot_tables.json
+├── CONTRIBUTING.md
+├── examples
+│   ├── logging.json
+│   ├── server.cpp
+│   └── test.py
+├── .gitignore
+├── include
+│   ├── config
+│   │   └── ConfigManager.hpp
+│   ├── database
+│   │   ├── CitusClient.hpp
+│   │   └── DatabasePool.hpp
+│   ├── game
+│   │   ├── ChunkCache.hpp
+│   │   ├── ChunkLOD.hpp
+│   │   ├── ChunkPool.hpp
+│   │   ├── ChunkStreamer.hpp
+│   │   ├── CollisionSystem.hpp
+│   │   ├── EntityManager.hpp
+│   │   ├── GameEntity.hpp
+│   │   ├── GameLogic.hpp
+│   │   ├── InventorySystem.hpp
+│   │   ├── LootItem.hpp
+│   │   ├── LootTable.hpp
+│   │   ├── MobSystem.hpp
+│   │   ├── NPCSystem.hpp
+│   │   ├── PlayerManager.hpp
+│   │   ├── WorldChunk.hpp
+│   │   └── WorldGenerator.hpp
+│   ├── logging
+│   │   └── Logger.hpp
+│   ├── network
+│   │   ├── ConnectionManager.hpp
+│   │   ├── GameServer.hpp
+│   │   └── GameSession.hpp
+│   ├── process
+│   │   └── ProcessPool.hpp
+│   └── scripting
+│       ├── PythonEvent.hpp
+│       ├── PythonModule.hpp
+│       └── PythonScripting.hpp
+├── install_dependencies_linux.sh
+├── install_dependencies_mac.sh
+├── LICENSE
+├── MOBS_SYSTEM.md
+├── QUICK_REFERENCE.md
+├── README.md
+├── scripts
+│   ├── client
+│   │   └── ui_handlers.py
+│   ├── db.sql
+│   ├── game_events.py
+│   ├── loot_handlers.py
+│   ├── mobs.py
+│   ├── quests.py
+│   └── server
+│       └── game_logic.py
+├── setup_dependencies.sh
+├── src
+│   ├── config
+│   │   └── ConfigManager.cpp
+│   ├── database
+│   │   ├── CitusClient.cpp
+│   │   └── DatabasePool.cpp
+│   ├── game
+│   │   ├── ChunkCache.cpp
+│   │   ├── ChunkLOD.cpp
+│   │   ├── ChunkPool.cpp
+│   │   ├── ChunkStreamer.cpp
+│   │   ├── GameEntity.cpp
+│   │   ├── GameLogic.cpp
+│   │   ├── InventorySystem.cpp
+│   │   ├── LootItem.cpp
+│   │   ├── LootTable.cpp
+│   │   ├── MobSystem.cpp
+│   │   ├── NPCSystem.cpp
+│   │   ├── PlayerManager.cpp
+│   │   └── WorldChunk.cpp
+│   ├── logging
+│   │   └── Logger.cpp
+│   ├── main.cpp
+│   ├── network
+│   │   ├── ConnectionManager.cpp
+│   │   ├── GameServer.cpp
+│   │   └── GameSession.cpp
+│   ├── process
+│   │   └── ProcessPool.cpp
+│   └── scripting
+│       ├── PythonAPI.cpp
+│       └── PythonScripting.cpp
+├── STRUCTURE.md
+└── vcpkg.json
 ```
 
 ---
