@@ -282,7 +282,7 @@ void GameLogic::Shutdown() {
 
 // =============== 3D World System Methods ===============
 
-WorldChunk* GameLogic::GetOrCreateChunk(int chunkX, int chunkZ) {
+std::shared_ptr<WorldChunk> GameLogic::GetOrCreateChunk(int chunkX, int chunkZ) {
     std::string chunkKey = std::to_string(chunkX) + "_" + std::to_string(chunkZ);
 
     std::lock_guard<std::mutex> lock(chunksMutex_);

@@ -60,7 +60,7 @@ public:
     void BroadcastToNearbyPlayers(const glm::vec3& position, const nlohmann::json& message, float radius = 50.0f);
 
     // World management
-    WorldChunk* GetOrCreateChunk(int chunkX, int chunkZ);
+    std::shared_ptr<WorldChunk> GetOrCreateChunk(int chunkX, int chunkZ);
     void UnloadDistantChunks(const glm::vec3& centerPosition, float keepRadius = 200.0f);
     void GenerateWorldAroundPlayer(uint64_t playerId, const glm::vec3& position);
 
