@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <thread>
 
 #include "../../include/game/ChunkPool.hpp"
 #include "../../include/game/WorldChunk.hpp"
@@ -185,24 +186,8 @@ std::string ChunkPool::MakeChunkKey(int x, int z, ChunkLOD lod) const {
 std::shared_ptr<WorldChunk> ChunkPool::CreateNewChunk(int x, int z, ChunkLOD lod) {
     auto chunk = std::make_shared<WorldChunk>(x, z, lod);
     
-    // Generate geometry based on LOD
-    switch (lod) {
-        case ChunkLOD::HIGH:
-            chunk->GenerateHighLODGeometry();
-            break;
-        case ChunkLOD::MEDIUM:
-            chunk->GenerateMediumLODGeometry();
-            break;
-        case ChunkLOD::LOW:
-            chunk->GenerateLowLODGeometry();
-            break;
-        case ChunkLOD::BILLBOARD:
-            chunk->GenerateBillboardGeometry();
-            break;
-        default:
-            chunk->GenerateGeometry();
-    }
-    
+    // Generate geometry
+    chunk->GenerateGeometry();
     chunk->GenerateCollisionMesh();
     return chunk;
 }

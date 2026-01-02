@@ -5,8 +5,8 @@
 const float WorldChunk::BLOCK_SIZE = 1.0f;
 const float WorldChunk::CHUNK_WIDTH = CHUNK_SIZE * BLOCK_SIZE;
 
-WorldChunk::WorldChunk(int x, int z)
-    : chunkX_(x), chunkZ_(z), biome_(BiomeType::PLAINS) {
+WorldChunk::WorldChunk(int x, int z, ChunkLOD lod)
+    : chunkX_(x), chunkZ_(z), lod_(lod), biome_(BiomeType::PLAINS) {
 
     blocks_.resize(CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE, BlockType::AIR);
     heightmap_.resize(CHUNK_SIZE * CHUNK_SIZE, 0.0f);
@@ -59,8 +59,6 @@ void WorldChunk::GenerateLowPolyGeometry() {
             }
         }
     }
-
-    GenerateCollisionMesh();
 }
 
 void WorldChunk::GenerateBlockVertices(int x, int y, int z, BlockType type) {
@@ -200,11 +198,18 @@ void WorldChunk::GenerateCollisionMesh() {
     }
 }
 
+bool WorldChunk::IsPositionInside(const glm::vec3& position) const {
+    glm::vec3 chunkPos = GetWorldPosition();
+    return position.x >= chunkPos.x && position.x < chunkPos.x + CHUNK_WIDTH &&
+           position.z >= chunkPos.z && position.z < chunkPos.z + CHUNK_WIDTH;
+}
+
 nlohmann::json WorldChunk::Serialize() const {
     nlohmann::json data;
 
     data["chunkX"] = chunkX_;
     data["chunkZ"] = chunkZ_;
+    data["lod"] = static_cast<int>(lod_);
     data["biome"] = static_cast<int>(biome_);
 
     // Serialize heightmap
@@ -227,6 +232,7 @@ nlohmann::json WorldChunk::Serialize() const {
 void WorldChunk::Deserialize(const nlohmann::json& data) {
     chunkX_ = data.value("chunkX", 0);
     chunkZ_ = data.value("chunkZ", 0);
+    lod_ = static_cast<ChunkLOD>(data.value("lod", 0));
     biome_ = static_cast<BiomeType>(data.value("biome", 0));
 
     // Deserialize heightmap
@@ -248,5 +254,5 @@ void WorldChunk::Deserialize(const nlohmann::json& data) {
     }
 
     // Regenerate geometry
-    GenerateLowPolyGeometry();
+    GenerateGeometry();
 }

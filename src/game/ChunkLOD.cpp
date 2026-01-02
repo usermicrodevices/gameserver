@@ -1,5 +1,8 @@
 #include <chrono>
 #include <glm/gtc/noise.hpp>
+#include <thread>
+#include <algorithm>
+#include <string>
 
 #include "../../include/game/ChunkLOD.hpp"
 #include "../../include/game/WorldGenerator.hpp"
@@ -87,6 +90,22 @@ void LODChunk::GenerateCollisionMesh() {
         collisionTriangles_.push_back({3, 0, 4});
         collisionTriangles_.push_back({3, 4, 7});
     }
+}
+
+void LODChunk::GenerateHighLODGeometry() {
+    GenerateHighLOD();
+}
+
+void LODChunk::GenerateMediumLODGeometry() {
+    GenerateMediumLOD();
+}
+
+void LODChunk::GenerateLowLODGeometry() {
+    GenerateLowLOD();
+}
+
+void LODChunk::GenerateBillboardGeometry() {
+    GenerateBillboard();
 }
 
 bool LODChunk::CanUpgradeLOD() const {
@@ -269,6 +288,25 @@ void LODChunk::SimplifyMesh(int factor) {
     
     vertices_ = std::move(simplified_vertices);
     triangles_ = std::move(simplified_triangles);
+}
+
+nlohmann::json LODChunk::Serialize() const {
+    auto json = WorldChunk::Serialize();
+    json["lod"] = static_cast<int>(lod_);
+    return json;
+}
+
+void LODChunk::Deserialize(const nlohmann::json& data) {
+    WorldChunk::Deserialize(data);
+    lod_ = static_cast<ChunkLOD>(data.value("lod", 0));
+}
+
+size_t LODChunk::GetTriangleCount() const {
+    return triangles_.size();
+}
+
+size_t LODChunk::GetVertexCount() const {
+    return vertices_.size();
 }
 
 // LODManager implementation

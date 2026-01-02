@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <nlohmann/json.hpp>
 
+#include "../../include/game/ChunkLOD.hpp"
+
 enum class BiomeType {
     PLAINS = 0,
     FOREST = 1,
@@ -52,7 +54,8 @@ public:
     static const float BLOCK_SIZE;
     static const float CHUNK_WIDTH;
 
-    WorldChunk(int x, int z);
+    WorldChunk(int x, int z, ChunkLOD lod = ChunkLOD::HIGH);
+    virtual ~WorldChunk() = default;
 
     // Geometry access
     const std::vector<Vertex>& GetVertices() const { return vertices_; }
@@ -63,6 +66,7 @@ public:
     // Metadata
     int GetChunkX() const { return chunkX_; }
     int GetChunkZ() const { return chunkZ_; }
+    virtual ChunkLOD GetLOD() const { return lod_; }
     BiomeType GetBiome() const { return biome_; }
     void SetBiome(BiomeType biome) { biome_ = biome; }
 
@@ -82,12 +86,19 @@ public:
     bool HasEntities() const { return !entities_.empty(); }
 
     // Serialization
-    nlohmann::json Serialize() const;
-    void Deserialize(const nlohmann::json& data);
+    virtual nlohmann::json Serialize() const;
+    virtual void Deserialize(const nlohmann::json& data);
 
     // Geometry generation
+    virtual void GenerateGeometry() { GenerateLowPolyGeometry(); }
     void GenerateLowPolyGeometry();
     void GenerateCollisionMesh();
+
+    // LOD-specific geometry generation
+    virtual void GenerateHighLODGeometry() { GenerateLowPolyGeometry(); }
+    virtual void GenerateMediumLODGeometry() { GenerateLowPolyGeometry(); }
+    virtual void GenerateLowLODGeometry() { GenerateLowPolyGeometry(); }
+    virtual void GenerateBillboardGeometry() { }
 
     // Utility
     bool IsPositionInside(const glm::vec3& position) const;
@@ -99,9 +110,10 @@ public:
         );
     }
 
-private:
+protected:
     int chunkX_;
     int chunkZ_;
+    ChunkLOD lod_;
     BiomeType biome_;
 
     // Block data

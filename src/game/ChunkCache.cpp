@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <sstream>
 #include <iomanip>
+#include <thread>
+#include <chrono>
 
 #include "../../include/game/ChunkCache.hpp"
 
@@ -25,7 +27,10 @@ ChunkCache::ChunkCache(const CacheConfig& config)
 }
 
 ChunkCache::~ChunkCache() {
-    running_ = false;
+    {
+        std::lock_guard<std::mutex> lock(save_mutex_);
+        running_ = false;
+    }
     save_cv_.notify_all();
     if (save_thread_.joinable()) {
         save_thread_.join();
@@ -369,6 +374,11 @@ bool ChunkCache::Flush() {
     
     // Save index
     return SaveToDisk();
+}
+
+void ChunkCache::SetConfig(const CacheConfig& config) {
+    std::unique_lock<std::shared_mutex> lock(cache_mutex_);
+    config_ = config;
 }
 
 size_t ChunkCache::GetMemoryUsage() const {

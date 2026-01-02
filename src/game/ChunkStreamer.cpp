@@ -1,6 +1,7 @@
 #include <chrono>
 #include <future>
 #include <algorithm>
+#include <thread>
 
 #include "../../include/game/ChunkStreamer.hpp"
 #include "../../include/game/WorldGenerator.hpp"
@@ -196,6 +197,11 @@ std::vector<std::shared_ptr<WorldChunk>> ChunkStreamer::GetLoadedChunks() const 
 bool ChunkStreamer::IsChunkLoaded(int x, int z) const {
     std::lock_guard<std::mutex> lock(queue_mutex_);
     return loaded_chunks_.find(MakeChunkKey(x, z)) != loaded_chunks_.end();
+}
+
+void ChunkStreamer::SetConfig(const StreamerConfig& config) {
+    std::lock_guard<std::mutex> lock(queue_mutex_);
+    config_ = config;
 }
 
 ChunkStreamer::StreamerStats ChunkStreamer::GetStats() const {

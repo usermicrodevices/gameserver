@@ -7,9 +7,16 @@
 #include <shared_mutex>
 #include <fstream>
 #include <filesystem>
+#include <thread>
+#include <condition_variable>
+#include <atomic>
+#include <list>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
-#include "WorldChunk.hpp"
-#include "ChunkLOD.hpp"
+#include "../../include/game/WorldChunk.hpp"
+#include "../../include/game/ChunkLOD.hpp"
 
 class ChunkCache {
 public:
@@ -179,178 +186,3 @@ private:
     void RecordSave(float time_ms);
     void RecordLoad(float time_ms);
 };
-
-// Implementation
-ChunkCache::ChunkCache(const CacheConfig& config) 
-    : config_(config) {
-    
-    // Create disk cache directory if enabled
-    if (config_.enable_disk_cache) {
-        std::filesystem::create_directories(config_.disk_cache_path);
-        
-        // Load disk cache index
-        std::string index_file = config_.disk_cache_path + "/index.dat";
-        if (std::filesystem::exists(index_file)) {
-            LoadFromDisk();
-        }
-    }
-    
-    // Start background save thread
-    if (config_.async_save) {
-        running_ = true;
-        save_thread_ = std::thread(&ChunkCache::SaveThreadFunc, this);
-    }
-}
-
-ChunkCache::~ChunkCache() {
-    running_ = false;
-    save_cv_.notify_all();
-    if (save_thread_.joinable()) {
-        save_thread_.join();
-    }
-    
-    // Save remaining dirty chunks
-    Flush();
-}
-
-bool ChunkCache::Put(int x, int z, ChunkLOD lod, 
-                     std::shared_ptr<WorldChunk> chunk) {
-    if (!chunk) return false;
-    
-    std::string key = MakeCacheKey(x, z, lod);
-    size_t estimated_size = EstimateChunkSize(*chunk);
-    
-    std::unique_lock<std::shared_mutex> lock(cache_mutex_);
-    
-    // Check if we need to evict
-    if (memory_cache_.size() >= config_.max_memory_cache_size ||
-        stats_.memory_usage_bytes + estimated_size > config_.max_memory_size_bytes) {
-        ApplyEvictionPolicy();
-    }
-    
-    // Create cache entry
-    CacheEntry entry{
-        .chunk = chunk,
-        .size_bytes = estimated_size,
-        .access_count = 1,
-        .last_access = std::chrono::steady_clock::now(),
-        .creation_time = std::chrono::steady_clock::now(),
-        .dirty = true,
-        .persisted = false
-    };
-    
-    // Add to memory cache
-    memory_cache_[key] = entry;
-    access_order_.push_front(key); // Most recently used
-    
-    // Update memory usage
-    UpdateMemoryUsage(estimated_size);
-    
-    // Queue for disk save if enabled
-    if (config_.enable_disk_cache) {
-        std::lock_guard<std::mutex> save_lock(save_mutex_);
-        save_queue_.push(key);
-        save_cv_.notify_one();
-    }
-    
-    return true;
-}
-
-std::shared_ptr<WorldChunk> ChunkCache::Get(int x, int z, ChunkLOD lod) {
-    std::string key = MakeCacheKey(x, z, lod);
-    
-    // Try memory cache first
-    {
-        std::shared_lock<std::shared_mutex> lock(cache_mutex_);
-        auto it = memory_cache_.find(key);
-        if (it != memory_cache_.end()) {
-            // Update access info
-            it->second.access_count++;
-            it->second.last_access = std::chrono::steady_clock::now();
-            
-            // Update LRU order
-            access_order_.remove(key);
-            access_order_.push_front(key);
-            
-            RecordHit(CacheLevel::MEMORY);
-            return it->second.chunk;
-        }
-    }
-    
-    // Memory cache miss
-    RecordMiss(CacheLevel::MEMORY);
-    
-    // Try disk cache if enabled
-    if (config_.enable_disk_cache) {
-        auto start_time = std::chrono::steady_clock::now();
-        auto chunk = LoadFromDiskInternal(key);
-        auto end_time = std::chrono::steady_clock::now();
-        
-        if (chunk) {
-            float load_time = std::chrono::duration<float, std::milli>(
-                end_time - start_time).count();
-            
-            RecordHit(CacheLevel::DISK);
-            RecordLoad(load_time);
-            
-            // Add to memory cache
-            Put(x, z, lod, chunk);
-            
-            return chunk;
-        }
-        RecordMiss(CacheLevel::DISK);
-    }
-    
-    // Cache miss at all levels
-    return nullptr;
-}
-
-void ChunkCache::SaveThreadFunc() {
-    std::vector<std::string> batch_keys;
-    batch_keys.reserve(config_.save_batch_size);
-    
-    while (running_) {
-        batch_keys.clear();
-        
-        {
-            std::unique_lock<std::mutex> lock(save_mutex_);
-            save_cv_.wait(lock, [this] {
-                return !running_ || !save_queue_.empty();
-            });
-            
-            if (!running_) break;
-            
-            // Collect batch of keys to save
-            while (!save_queue_.empty() && 
-                   batch_keys.size() < config_.save_batch_size) {
-                batch_keys.push_back(save_queue_.front());
-                save_queue_.pop();
-            }
-        }
-        
-        // Process batch
-        for (const auto& key : batch_keys) {
-            std::shared_lock<std::shared_mutex> cache_lock(cache_mutex_);
-            auto it = memory_cache_.find(key);
-            if (it != memory_cache_.end() && it->second.dirty) {
-                cache_lock.unlock();
-                
-                auto start_time = std::chrono::steady_clock::now();
-                bool saved = SaveToDiskInternal(key, it->second);
-                auto end_time = std::chrono::steady_clock::now();
-                
-                if (saved) {
-                    std::unique_lock<std::shared_mutex> write_lock(cache_mutex_);
-                    it->second.dirty = false;
-                    it->second.persisted = true;
-                    write_lock.unlock();
-                    
-                    float save_time = std::chrono::duration<float, std::milli>(
-                        end_time - start_time).count();
-                    RecordSave(save_time);
-                    stats_.cache_saves++;
-                }
-            }
-        }
-    }
-}

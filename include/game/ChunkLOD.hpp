@@ -4,8 +4,10 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <chrono>
+#include <unordered_map>
 
-#include "WorldChunk.hpp"
+#include "../../include/game/WorldChunk.hpp"
 
 enum class ChunkLOD {
     HIGH = 0,      // Full detail (0-50 units)
@@ -42,12 +44,18 @@ class LODChunk : public WorldChunk {
 public:
     LODChunk(int x, int z, ChunkLOD lod);
     
-    ChunkLOD GetLOD() const { return lod_; }
+    ChunkLOD GetLOD() const override { return lod_; }
     void SetLOD(ChunkLOD lod);
     
     // Override base methods for LOD-specific behavior
     void GenerateGeometry() override;
     void GenerateCollisionMesh() override;
+    
+    // LOD-specific geometry generation
+    void GenerateHighLODGeometry() override;
+    void GenerateMediumLODGeometry() override;
+    void GenerateLowLODGeometry() override;
+    void GenerateBillboardGeometry() override;
     
     // LOD transitions
     bool CanUpgradeLOD() const;
